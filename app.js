@@ -1,3 +1,15 @@
+// -- code review ---------------------
+
+// - No lint errors (indentation)
+// - Commented functions that define their purpose, inputs and values
+// - Good and clear variable names used
+// - Functions used have a single responsibility with the exception for jsonToRenderPath & stateRender
+// - Great code
+
+// ------------------------------------
+
+
+
 //------ ** define state! ** ----------|
 
 
@@ -10,17 +22,31 @@ let initialState = {
 
 //------ ** state mod functions ** ----------|
 
-
+/**
+ * @function updatesStateWeatherData
+ * @desc     Adds weather data into the state object
+ * @param    {object} data
+ */
   // store api data
 function updatesStateWeatherData(data){
 	initialState.weatherData = data;
 }
 
+/**
+ * @function updatesStateGifData
+ * @desc     Adds gif data into the state object
+ * @param    {object} data
+ */
 function updatesStateGifData(data) {
 	// chooce images.ourpreferredsizeimage
 	initialState.gifData = data.data.image_original_url;
 }
 
+/**
+ * @function pressureAndTemperatureConversion
+ * @desc     Conversion of measurement units (pascal to mercury)
+ * @param    {object} state
+ */
 function pressureAndTemperatureConversion(state) {
 	const pascalToMercury = 0.75006375541921;
   state.weatherData.main.temp = ((9/5) * (state.weatherData.main.temp - 273.15) + 32).toFixed(2);
@@ -29,6 +55,12 @@ function pressureAndTemperatureConversion(state) {
   state.weatherData.main.pressure = ((state.weatherData.main.pressure * pascalToMercury) / 100).toFixed(2);
 }
 
+/**
+ * @function windConversion
+ * @desc     Sets wind direction from the values pulled from state object weatherData
+ * @param    {object} state
+ * @returns  {string} - wind direction value
+ */
 function windConversion(state) {
 	let windDirection = state.weatherData.wind.deg;
 
@@ -93,7 +125,11 @@ function windConversion(state) {
 
 //------ ** render functions ** ----------|
 
-
+/**
+ * @function stateRender
+ * @desc     Removes hidden classes on divs in HTML and adds weather data into them for display
+ * @param    {object} state
+ */
 function stateRender(state) {
 	// DRY this up! (Don't Repeat Yourself). (Reduce duplication.)
 
@@ -138,6 +174,11 @@ function stateRender(state) {
 
 }
 
+/**
+ * @function errorRender
+ * @desc     If no valid city was inputted, display visual error
+ * @param    {object} state
+ */
 function errorRender(state) {
 	// Refactor this into main render function and
 	// use state to determine whether error is showing.
@@ -154,6 +195,11 @@ function errorRender(state) {
 		.removeClass('hidden');
 }
 
+/**
+ * @function rendersGif
+ * @desc     Renders gif to html doc
+ * @param    {object} state
+ */
 function rendersGif (state) {
 	const gif = state.gifData;
 	let gifRenderTemplate = (`
@@ -163,6 +209,13 @@ function rendersGif (state) {
 }
 
 //------ ** functions to write ** ----------|
+
+/**
+ * @function getGIFData
+ * @desc     Retrieves gif api data using get request
+ * @param    {function} callback
+ * @returns  {object} - new version of state
+ */
 function getGIFData(callback){
 	 const appKey = '6cb3b870c31b4846b6b714316ea2639e';
 	 const baseUrl = 'http://api.giphy.com/v1/gifs/random';
@@ -173,6 +226,12 @@ function getGIFData(callback){
 	 $.getJSON(baseUrl, query, callback)
 }
 
+/**
+ * @function getApiData
+ * @desc     Retrieves weather api data using get request
+ * @param    {string} cityName - user's input value
+ * @param    {function} callback 
+ */
 function getApiData(cityName, callback) {
   const appKey = "0b0b48a8c8b04be0075e7d47726f1633"
   const baseUrl = "http://api.openweathermap.org/data/2.5/weather"
@@ -186,6 +245,11 @@ function getApiData(cityName, callback) {
 		.fail(e => {errorRender(initialState)})
 }
 
+/**
+ * @function jsonToRenderPath
+ * @desc     Runs both 3 functions when called which converts data values, changes name values and runs listener event function 
+ * @param    {object} data
+ */
 function jsonToRenderPath(data) {
   updatesStateWeatherData(data);
 
@@ -201,6 +265,11 @@ function jsonToRenderPath(data) {
 	moreInfoListener();
 }
 
+/**
+ * @function gifJsonToRenderPath
+ * @desc     Runs both updatesStateGifData & rendersGif when called
+ * @param    {object} data
+ */
 function gifJsonToRenderPath(data) {
 	// update state
 	updatesStateGifData(data);
@@ -210,7 +279,10 @@ function gifJsonToRenderPath(data) {
 
 //------ ** make event listener functions ** ----------|
 
-
+/**
+ * @function submitCityListener
+ * @desc     Listens for submit, grabs user's input data and runs getApiData function to retreive data from api
+ */
 // search city submit functions
 const submitCityListener = function(){
 	$('#js-form').submit(function(event){
@@ -224,6 +296,12 @@ const submitCityListener = function(){
 	});
 }
 
+
+/**
+ * @function moreInfoListener
+ * @desc     Enables more data to be displayed using a class toggle
+ * @param    {object} state
+ */
 //extra info click
 const moreInfoListener = function() {
 	$('.more-button').on('click',function(event) {
@@ -237,6 +315,10 @@ const moreInfoListener = function() {
 	});
 }
 
+/**
+ * @function anonymous function
+ * @desc     Runs submitCityListener when page is done loading
+ */
 $(function(){
 	submitCityListener();
 });
